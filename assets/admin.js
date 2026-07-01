@@ -247,7 +247,7 @@
     const publishBtn = document.createElement("button");
     publishBtn.type = "button";
     publishBtn.className = "button";
-    publishBtn.textContent = "🚀 Export & Publish";
+    publishBtn.textContent = "🚀 Publish Live";
     publishBtn.style.cssText = "padding: 8px 16px; font-size: 0.85rem; border-radius: 999px; background: var(--red); color: var(--white); font-weight: 900; border: none; cursor: pointer;";
 
     const logoutBtn = document.createElement("button");
@@ -267,7 +267,7 @@
     });
 
     publishBtn.addEventListener("click", () => {
-      exportPublishedSite();
+      exportPublishedSite(publishBtn);
     });
 
     logoutBtn.addEventListener("click", () => {
@@ -424,7 +424,7 @@
     backdrop.appendChild(card);
   }
 
-  function exportPublishedSite() {
+  function exportPublishedSite(publishBtn) {
     // We clone the document documentElement, apply current content, and generate downloadable html patch
     const htmlClone = document.documentElement.cloneNode(true);
     // Clean up admin modals and scripts from the exported clone if needed, but keeping data-admin-key allows future edits
@@ -434,16 +434,40 @@
     adminModals.forEach((m) => m.remove());
 
     const htmlContent = "<!DOCTYPE html>\n" + htmlClone.outerHTML;
-    const blob = new Blob([htmlContent], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "index.html";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    
+    if (publishBtn) publishBtn.textContent = "🚀 Publishing...";
+    
+    fetch('/api/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ html: htmlContent })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        if (publishBtn) {
+          publishBtn.textContent = "✅ Published Live!";
+          setTimeout(() => { publishBtn.textContent = "🚀 Publish Live"; }, 2000);
+        }
+      } else {
+        alert("Publish failed: " + (data.error || 'Unknown error'));
+        if (publishBtn) publishBtn.textContent = "🚀 Publish Live";
+      }
+    })
+    .catch(err => {
+      // Fallback for purely static environments without the Node server
+      console.warn("Backend /api/publish not found, falling back to download.");
+      const blob = new Blob([htmlContent], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "index.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      if (publishBtn) publishBtn.textContent = "🚀 Publish Live";
+    });
   }
 
   // Inject CSS rules for admin editable highlights
