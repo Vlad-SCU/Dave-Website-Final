@@ -2042,8 +2042,21 @@ label + .submit-button {
 }
 
 .contact {
-  background: var(--paper);
+  position: relative;
+  background: radial-gradient(circle at top right, #fbfaf8, #eef2f5);
   border-top: 1px solid var(--line-soft);
+  z-index: 1;
+}
+
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(16, 41, 64, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 41, 64, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  z-index: -1;
 }
 
 .contact-list {
