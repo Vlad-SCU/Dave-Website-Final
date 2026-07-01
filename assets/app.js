@@ -101,6 +101,12 @@ function renderStores() {
   const directory = qs("[data-store-directory]");
   const empty = qs("[data-empty-stores]");
   if (!directory) return;
+  
+  const countEl = qs("[data-store-count]");
+  if (countEl && storeData && storeData.groups) {
+    const total = storeData.groups.reduce((sum, g) => sum + g.items.length, 0);
+    countEl.textContent = total;
+  }
 
   directory.innerHTML = "";
   let visibleCount = 0;
