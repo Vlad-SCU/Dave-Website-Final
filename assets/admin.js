@@ -49,6 +49,22 @@
           if (typeof override.alt === "string") el.setAttribute("alt", override.alt);
         }
       });
+      
+      const savedHidden = localStorage.getItem("streamline_admin_hidden");
+      if (savedHidden) {
+        const hiddenIds = JSON.parse(savedHidden);
+        const sections = Array.from(document.querySelectorAll("section"));
+        hiddenIds.forEach(idx => {
+          if (sections[idx]) sections[idx].setAttribute("data-hidden", "true");
+        });
+      }
+
+      const savedStores = localStorage.getItem("streamline_admin_stores");
+      if (savedStores) {
+        window.STREAMLINE_STORE_DATA = JSON.parse(savedStores);
+        window.dispatchEvent(new Event("streamlineStoresUpdated"));
+        window.streamlineStoresModified = true;
+      }
     } catch (err) {
       console.warn("Failed to load saved overrides securely:", err);
     }
@@ -259,6 +275,19 @@
     saveBtn.addEventListener("click", () => {
       try {
         localStorage.setItem("streamline_admin_overrides", JSON.stringify(editedOverrides));
+        
+        // Save hidden sections by index
+        const sections = Array.from(document.querySelectorAll("section"));
+        const hiddenIds = [];
+        sections.forEach((sec, idx) => {
+          if (sec.getAttribute("data-hidden") === "true") hiddenIds.push(idx);
+        });
+        localStorage.setItem("streamline_admin_hidden", JSON.stringify(hiddenIds));
+        
+        if (window.streamlineStoresModified && window.STREAMLINE_STORE_DATA) {
+          localStorage.setItem("streamline_admin_stores", JSON.stringify(window.STREAMLINE_STORE_DATA));
+        }
+
         saveBtn.textContent = "✅ Saved Locally!";
         setTimeout(() => { saveBtn.textContent = "💾 Save Changes"; }, 2000);
       } catch (e) {
@@ -386,9 +415,51 @@
       return inp;
     };
 
-    const nameInp = mkInput("Store Name:", "e.g. Glacier Peak Wrestling");
-    const logoInp = mkInput("Logo URL:", "https://...");
-    const urlInp = mkInput("Store Link:", "https://streamline-llc.net/...");
+    const nameInp = mkInput("Store Name (Required):", "e.g. Glacier Peak Wrestling");
+    
+    // Custom Image Upload logic
+    const imgLabel = document.createElement("label");
+    imgLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+    imgLabel.textContent = "Logo Image (URL or Upload):";
+    
+    const imgWrapper = document.createElement("div");
+    imgWrapper.style.cssText = "display: flex; gap: 8px;";
+    
+    const logoInp = document.createElement("input");
+    logoInp.type = "text";
+    logoInp.placeholder = "https://...";
+    logoInp.style.cssText = "flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+    
+    const fileInp = document.createElement("input");
+    fileInp.type = "file";
+    fileInp.accept = "image/*";
+    fileInp.style.display = "none";
+    
+    const fileBtn = document.createElement("button");
+    fileBtn.type = "button";
+    fileBtn.className = "button quiet";
+    fileBtn.textContent = "📁 Upload";
+    fileBtn.style.cssText = "padding: 10px; border-radius: 8px; cursor: pointer; white-space: nowrap;";
+    fileBtn.addEventListener("click", () => fileInp.click());
+    
+    fileInp.addEventListener("change", () => {
+      const file = fileInp.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          logoInp.value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    imgWrapper.appendChild(logoInp);
+    imgWrapper.appendChild(fileBtn);
+    imgWrapper.appendChild(fileInp);
+    imgLabel.appendChild(imgWrapper);
+    card.appendChild(imgLabel);
+
+    const urlInp = mkInput("Store Link (Required):", "https://streamline-llc.net/...");
 
     const catLabel = document.createElement("label");
     catLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
@@ -424,11 +495,26 @@
     
     saveBtn.addEventListener("click", () => {
       const targetGroup = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === catSelect.value);
-      if (targetGroup && nameInp.value) {
+      const nameVal = nameInp.value.trim();
+      const urlVal = urlInp.value.trim();
+      const logoVal = logoInp.value.trim();
+
+      if (!nameVal || !urlVal) {
+        alert("Please enter both a Store Name and a Store Link.");
+        return;
+      }
+      try {
+        new URL(urlVal);
+      } catch(e) {
+        alert("Please enter a valid full URL for the Store Link (e.g. https://streamline-llc.net/store)");
+        return;
+      }
+
+      if (targetGroup) {
         targetGroup.items.push({
-          name: nameInp.value,
-          logo: logoInp.value,
-          url: urlInp.value
+          name: nameVal,
+          logo: logoVal || "assets/streamline-logo.png",
+          url: urlVal
         });
         window.STREAMLINE_STORE_DATA.storeCount++;
         // Dispatch event to app.js so it can re-render

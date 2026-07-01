@@ -2833,7 +2833,16 @@ section[data-hidden="true"] {
 
 body.admin-mode section[data-hidden="true"] {
   display: block !important;
-  opacity: 0.4 !important;
-  filter: grayscale(100%);
   outline: 2px dashed #888;
+  position: relative;
+}
+
+body.admin-mode section[data-hidden="true"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: grayscale(100%);
+  z-index: 998;
+  pointer-events: none;
 }
