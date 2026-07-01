@@ -666,6 +666,15 @@
     sectionToggles.forEach(t => t.remove());
     const addStoreBtns = htmlClone.querySelectorAll(".admin-add-store-btn");
     addStoreBtns.forEach(b => b.remove());
+    
+    // Remove injected admin styles
+    const adminStyles = htmlClone.querySelector("#admin-styles");
+    if (adminStyles) adminStyles.remove();
+
+    // Strip admin classes from the body and all editable elements
+    htmlClone.querySelector("body").classList.remove("admin-mode");
+    const editableElements = htmlClone.querySelectorAll(".admin-editable-hover");
+    editableElements.forEach(el => el.classList.remove("admin-editable-hover"));
 
     const htmlContent = "<!DOCTYPE html>\n" + htmlClone.outerHTML;
     
@@ -709,7 +718,9 @@
 
   // Inject CSS rules for admin editable highlights
   function injectAdminStyles() {
+    if (document.getElementById("admin-styles")) return;
     const style = document.createElement("style");
+    style.id = "admin-styles";
     style.textContent = `
       .admin-editable-hover {
         transition: outline 0.2s ease, background 0.2s ease;
