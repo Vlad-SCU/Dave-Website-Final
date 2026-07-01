@@ -88,19 +88,21 @@
     btn.type = "button";
     btn.className = "admin-toggle-btn";
     btn.setAttribute("aria-label", "Admin Mode Login");
-    btn.style.cssText = "padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; border: 1px solid transparent; color: rgba(255, 255, 255, 0.45); cursor: pointer; background: transparent; transition: all 0.2s ease; margin-left: auto;";
+    btn.style.cssText = "padding: 5px 12px; font-size: 0.8rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.18); color: rgba(255, 255, 255, 0.72); cursor: pointer; background: rgba(255, 255, 255, 0.05); transition: all 0.2s ease; margin-left: auto;";
     btn.textContent = "⚙️ Admin";
 
     btn.addEventListener("mouseover", () => {
       if (!isAdminAuthenticated) {
-        btn.style.color = "rgba(255, 255, 255, 0.9)";
-        btn.style.borderColor = "rgba(255, 255, 255, 0.2)";
+        btn.style.color = "var(--white)";
+        btn.style.borderColor = "rgba(255, 255, 255, 0.4)";
+        btn.style.background = "rgba(255, 255, 255, 0.12)";
       }
     });
     btn.addEventListener("mouseout", () => {
       if (!isAdminAuthenticated) {
-        btn.style.color = "rgba(255, 255, 255, 0.45)";
-        btn.style.borderColor = "transparent";
+        btn.style.color = "rgba(255, 255, 255, 0.72)";
+        btn.style.borderColor = "rgba(255, 255, 255, 0.18)";
+        btn.style.background = "rgba(255, 255, 255, 0.05)";
       }
     });
 
@@ -213,9 +215,9 @@
       btn.style.fontWeight = "900";
       btn.textContent = "⚙️ Admin Active";
     } else {
-      btn.style.background = "transparent";
-      btn.style.color = "rgba(255, 255, 255, 0.45)";
-      btn.style.borderColor = "transparent";
+      btn.style.background = "rgba(255, 255, 255, 0.05)";
+      btn.style.color = "rgba(255, 255, 255, 0.72)";
+      btn.style.borderColor = "rgba(255, 255, 255, 0.18)";
       btn.style.fontWeight = "normal";
       btn.textContent = "⚙️ Admin";
     }
