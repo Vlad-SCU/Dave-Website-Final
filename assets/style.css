@@ -2278,11 +2278,11 @@ label + .submit-button {
   box-shadow: 0 12px 24px rgba(231, 71, 47, 0.3);
 }
 
-.footer-cta-btn .arrow {
+.button .arrow {
   transition: transform 0.3s var(--ease);
 }
 
-.footer-cta-btn:hover .arrow {
+.button:hover .arrow {
   transform: translateX(4px);
 }
 
