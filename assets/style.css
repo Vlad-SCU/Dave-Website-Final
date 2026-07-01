@@ -2846,3 +2846,13 @@ body.admin-mode section[data-hidden="true"]::before {
   z-index: 998;
   pointer-events: none;
 }
+
+body.admin-mode .store-card {
+  transition: outline 0.2s ease, background 0.2s ease;
+}
+body.admin-mode .store-card:hover {
+  outline: 2px dashed var(--red) !important;
+  outline-offset: 4px;
+  cursor: pointer !important;
+  background: rgba(231, 71, 47, 0.05) !important;
+}

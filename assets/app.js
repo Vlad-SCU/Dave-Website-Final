@@ -64,10 +64,12 @@ function renderFilter() {
   });
 }
 
-function createStoreCard(item) {
+function createStoreCard(item, groupName = "") {
   const card = document.createElement("a");
   card.className = "store-card";
   card.href = item.url;
+  if (groupName) card.setAttribute("data-store-group", groupName);
+  card.setAttribute("data-store-name", item.name);
   card.target = "_blank";
   card.rel = "noreferrer";
   card.innerHTML = `
@@ -123,7 +125,7 @@ function renderStores() {
 
     const grid = document.createElement("div");
     grid.className = "store-grid";
-    matches.forEach((item) => grid.append(createStoreCard(item)));
+    matches.forEach((item) => grid.append(createStoreCard(item, group.group)));
 
     details.append(summary, grid);
     directory.append(details);

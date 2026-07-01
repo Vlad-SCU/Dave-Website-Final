@@ -329,6 +329,11 @@
       }
     });
 
+    document.querySelectorAll(".store-card").forEach(c => {
+      if (enable) c.setAttribute("draggable", "true");
+      else c.removeAttribute("draggable");
+    });
+
     // Handle hide/unhide toggles on sections
     document.querySelectorAll("section").forEach(sec => {
       if (enable) {
@@ -763,10 +768,255 @@
     document.head.appendChild(style);
   }
 
+  // --- STORE DRAG & DROP AND EDIT ---
+  function openStoreEditModal(groupName, storeName) {
+    if (!window.STREAMLINE_STORE_DATA) return;
+    const group = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === groupName);
+    if (!group) return;
+    const storeIndex = group.items.findIndex(s => s.name === storeName);
+    if (storeIndex === -1) return;
+    const store = group.items[storeIndex];
+
+    let backdrop = document.querySelector(".admin-edit-backdrop");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.className = "admin-edit-backdrop";
+      backdrop.style.cssText = "position: fixed; inset: 0; background: rgba(16, 41, 64, 0.65); backdrop-filter: blur(8px); z-index: 1000001; display: grid; place-items: center; padding: 20px;";
+      document.body.appendChild(backdrop);
+    }
+    backdrop.replaceChildren();
+
+    const card = document.createElement("div");
+    card.style.cssText = "background: var(--white); border-radius: 16px; padding: 32px; width: min(500px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 16px;";
+
+    const title = document.createElement("h3");
+    title.textContent = "Edit Store";
+    title.style.cssText = "margin: 0; font-size: 1.35rem; color: var(--navy);";
+    card.appendChild(title);
+
+    const mkInput = (lbl) => {
+      const wrap = document.createElement("label");
+      wrap.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+      wrap.textContent = lbl;
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+      wrap.appendChild(inp);
+      card.appendChild(wrap);
+      return inp;
+    };
+
+    const nameInp = mkInput("Store Name:");
+    nameInp.value = store.name;
+
+    const imgLabel = document.createElement("label");
+    imgLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+    imgLabel.textContent = "Logo Image (URL or Upload):";
+    
+    const imgWrapper = document.createElement("div");
+    imgWrapper.style.cssText = "display: flex; gap: 8px;";
+    
+    const logoInp = document.createElement("input");
+    logoInp.type = "text";
+    logoInp.value = store.logo;
+    logoInp.style.cssText = "flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+    
+    const fileInp = document.createElement("input");
+    fileInp.type = "file";
+    fileInp.accept = "image/*";
+    fileInp.style.display = "none";
+    
+    const fileBtn = document.createElement("button");
+    fileBtn.type = "button";
+    fileBtn.className = "button quiet";
+    fileBtn.textContent = "📁 Upload";
+    fileBtn.style.cssText = "padding: 10px; border-radius: 8px; cursor: pointer; white-space: nowrap;";
+    fileBtn.addEventListener("click", () => fileInp.click());
+    
+    fileInp.addEventListener("change", () => {
+      const file = fileInp.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => { logoInp.value = e.target.result; };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    imgWrapper.appendChild(logoInp);
+    imgWrapper.appendChild(fileBtn);
+    imgWrapper.appendChild(fileInp);
+    imgLabel.appendChild(imgWrapper);
+    card.appendChild(imgLabel);
+
+    const urlInp = mkInput("Store Link:");
+    urlInp.value = store.url;
+
+    const catLabel = document.createElement("label");
+    catLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+    catLabel.textContent = "Category:";
+    const catSelect = document.createElement("select");
+    catSelect.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+    window.STREAMLINE_STORE_DATA.groups.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g.group;
+      opt.textContent = g.group;
+      if (g.group === groupName) opt.selected = true;
+      catSelect.appendChild(opt);
+    });
+    catLabel.appendChild(catSelect);
+    card.appendChild(catLabel);
+
+    const btnRow = document.createElement("div");
+    btnRow.style.cssText = "display: flex; gap: 12px; margin-top: 12px;";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "button quiet";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer;";
+    cancelBtn.addEventListener("click", () => backdrop.remove());
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.textContent = "🗑️ Delete";
+    deleteBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer; background: var(--red); color: white; border: none; font-weight: bold;";
+    
+    let deleteConfirmMode = false;
+    deleteBtn.addEventListener("click", () => {
+      if (!deleteConfirmMode) {
+        deleteConfirmMode = true;
+        deleteBtn.textContent = "Sure?";
+        setTimeout(() => { deleteConfirmMode = false; deleteBtn.textContent = "🗑️ Delete"; }, 3000);
+      } else {
+        group.items.splice(storeIndex, 1);
+        window.STREAMLINE_STORE_DATA.storeCount--;
+        window.streamlineStoresModified = true;
+        window.dispatchEvent(new Event("streamlineStoresUpdated"));
+        backdrop.remove();
+      }
+    });
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "button primary";
+    saveBtn.textContent = "Save Changes";
+    saveBtn.style.cssText = "flex: 1.5; padding: 12px; border-radius: 999px; cursor: pointer;";
+    
+    saveBtn.addEventListener("click", () => {
+      const newGroupVal = catSelect.value;
+      const nameVal = nameInp.value.trim();
+      const urlVal = urlInp.value.trim();
+      const logoVal = logoInp.value.trim();
+
+      if (!nameVal || !urlVal) return;
+
+      store.name = nameVal;
+      store.url = urlVal;
+      store.logo = logoVal || "assets/streamline-logo.png";
+
+      if (newGroupVal !== groupName) {
+        const destGroup = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === newGroupVal);
+        if (destGroup) {
+          group.items.splice(storeIndex, 1);
+          destGroup.items.push(store);
+        }
+      }
+
+      window.streamlineStoresModified = true;
+      window.dispatchEvent(new Event("streamlineStoresUpdated"));
+      backdrop.remove();
+    });
+
+    btnRow.appendChild(cancelBtn);
+    btnRow.appendChild(deleteBtn);
+    btnRow.appendChild(saveBtn);
+    card.appendChild(btnRow);
+    backdrop.appendChild(card);
+  }
+
+  function initStoreAdminFeatures() {
+    const storesWrapper = document.querySelector(".store-directory");
+    if (!storesWrapper) return;
+
+    window.addEventListener("streamlineStoresUpdated", () => {
+      if (isEditModeActive) {
+        document.querySelectorAll(".store-card").forEach(c => c.setAttribute("draggable", "true"));
+      }
+    });
+
+    let draggedStore = null;
+
+    storesWrapper.addEventListener("dragstart", (e) => {
+      if (!isEditModeActive) return;
+      const card = e.target.closest(".store-card");
+      if (!card) return;
+      draggedStore = {
+        group: card.getAttribute("data-store-group"),
+        name: card.getAttribute("data-store-name")
+      };
+      setTimeout(() => card.style.opacity = "0.4", 0);
+    });
+
+    storesWrapper.addEventListener("dragend", (e) => {
+      const card = e.target.closest(".store-card");
+      if (card) card.style.opacity = "1";
+      draggedStore = null;
+    });
+
+    storesWrapper.addEventListener("dragover", (e) => {
+      if (!isEditModeActive || !draggedStore) return;
+      const details = e.target.closest("details.store-group");
+      if (details) {
+        e.preventDefault();
+        details.style.backgroundColor = "rgba(0,0,0,0.03)";
+      }
+    });
+
+    storesWrapper.addEventListener("dragleave", (e) => {
+      const details = e.target.closest("details.store-group");
+      if (details) details.style.backgroundColor = "";
+    });
+
+    storesWrapper.addEventListener("drop", (e) => {
+      if (!isEditModeActive || !draggedStore) return;
+      e.preventDefault();
+      const details = e.target.closest("details.store-group");
+      if (details) {
+        details.style.backgroundColor = "";
+        const targetGroupName = details.querySelector(".store-group-name").textContent.trim();
+        if (targetGroupName && targetGroupName !== draggedStore.group) {
+          const sourceGroup = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === draggedStore.group);
+          const destGroup = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === targetGroupName);
+          if (sourceGroup && destGroup) {
+            const idx = sourceGroup.items.findIndex(s => s.name === draggedStore.name);
+            if (idx > -1) {
+              const item = sourceGroup.items.splice(idx, 1)[0];
+              destGroup.items.push(item);
+              window.streamlineStoresModified = true;
+              window.dispatchEvent(new Event("streamlineStoresUpdated"));
+            }
+          }
+        }
+      }
+    });
+
+    storesWrapper.addEventListener("click", (e) => {
+      if (!isEditModeActive) return;
+      const card = e.target.closest(".store-card");
+      if (card) {
+        e.preventDefault();
+        const gName = card.getAttribute("data-store-group");
+        const sName = card.getAttribute("data-store-name");
+        openStoreEditModal(gName, sName);
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     injectAdminStyles();
     tagEditableElements();
     loadSavedOverrides();
+    initStoreAdminFeatures();
     createAdminButton();
   });
 })();
