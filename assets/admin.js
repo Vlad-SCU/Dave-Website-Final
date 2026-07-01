@@ -300,10 +300,7 @@
     });
 
     logoutBtn.addEventListener("click", () => {
-      isAdminAuthenticated = false;
-      toggleEditMode(false);
-      bar.style.display = "none";
-      updateAdminBtnState();
+      window.location.reload();
     });
 
     btnGroup.appendChild(saveBtn);
