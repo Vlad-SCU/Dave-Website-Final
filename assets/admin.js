@@ -340,7 +340,7 @@
           toggle.style.cssText = "position: absolute; top: 12px; right: 12px; z-index: 999; padding: 6px 12px; font-size: 0.8rem; background: rgba(0,0,0,0.8); color: white; border: none; cursor: pointer; border-radius: 8px;";
           
           const updateToggleText = () => {
-             toggle.textContent = sec.getAttribute("data-hidden") === "true" ? "👁️ Unhide Section" : "👻 Hide Section";
+             toggle.textContent = sec.getAttribute("data-hidden") === "true" ? "Unhide Section" : "Hide Section";
           };
           updateToggleText();
           
@@ -559,12 +559,43 @@
     if (el.tagName.toLowerCase() === "img") {
       const srcLabel = document.createElement("label");
       srcLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
-      srcLabel.textContent = "Image URL / Path:";
+      srcLabel.textContent = "Image URL or Upload File:";
+      
+      const imgWrapper = document.createElement("div");
+      imgWrapper.style.cssText = "display: flex; gap: 8px;";
+      
       const srcInput = document.createElement("input");
       srcInput.type = "text";
       srcInput.value = el.getAttribute("src") || "";
-      srcInput.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; width: 100%;";
-      srcLabel.appendChild(srcInput);
+      srcInput.style.cssText = "flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;";
+      
+      const fileInp = document.createElement("input");
+      fileInp.type = "file";
+      fileInp.accept = "image/*";
+      fileInp.style.display = "none";
+      
+      const fileBtn = document.createElement("button");
+      fileBtn.type = "button";
+      fileBtn.className = "button quiet";
+      fileBtn.textContent = "📁 Upload";
+      fileBtn.style.cssText = "padding: 10px; border-radius: 8px; cursor: pointer; white-space: nowrap;";
+      fileBtn.addEventListener("click", () => fileInp.click());
+      
+      fileInp.addEventListener("change", () => {
+        const file = fileInp.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            srcInput.value = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      imgWrapper.appendChild(srcInput);
+      imgWrapper.appendChild(fileBtn);
+      imgWrapper.appendChild(fileInp);
+      srcLabel.appendChild(imgWrapper);
 
       const altLabel = document.createElement("label");
       altLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
@@ -572,7 +603,7 @@
       const altInput = document.createElement("input");
       altInput.type = "text";
       altInput.value = el.getAttribute("alt") || "";
-      altInput.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; width: 100%;";
+      altInput.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem; width: 100%; box-sizing: border-box;";
       altLabel.appendChild(altInput);
 
       card.appendChild(srcLabel);
