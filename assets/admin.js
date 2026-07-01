@@ -233,7 +233,7 @@
 
     const status = document.createElement("span");
     status.style.cssText = "font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 8px;";
-    status.textContent = "🟢 Admin Mode Active — Click any text or image to edit";
+    status.textContent = "Admin Mode Active — Click any text or image to edit";
 
     const btnGroup = document.createElement("div");
     btnGroup.style.cssText = "display: flex; gap: 8px;";
@@ -432,6 +432,8 @@
     if (adminBar) adminBar.remove();
     const adminModals = htmlClone.querySelectorAll(".admin-modal-backdrop, .admin-edit-backdrop");
     adminModals.forEach((m) => m.remove());
+    const adminBtn = htmlClone.querySelector(".admin-toggle-btn");
+    if (adminBtn) adminBtn.remove();
 
     const htmlContent = "<!DOCTYPE html>\n" + htmlClone.outerHTML;
     
