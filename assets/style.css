@@ -1453,13 +1453,13 @@ p {
   min-height: 118px;
   border: none;
   border-radius: 12px;
-  background: transparent;
+  background: var(--navy);
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .featured-store:hover {
   transform: translateY(-2px);
-  background: var(--paper);
+  background: var(--navy-2);
 }
 
 .featured-store img {
