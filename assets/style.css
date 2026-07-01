@@ -1364,21 +1364,21 @@ p {
   align-items: center;
   gap: 12px;
   padding: 16px 24px;
-  border: 1px solid var(--line-soft);
+  border: none;
   border-radius: 999px;
-  background: var(--white);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  background: var(--navy);
+  box-shadow: 0 8px 24px rgba(16, 41, 64, 0.15);
 }
 
 .store-stats strong {
-  color: var(--navy);
-  font-size: 2rem;
+  color: var(--white);
+  font-size: 2.2rem;
   font-weight: 900;
   line-height: 1;
 }
 
 .store-stats span {
-  color: var(--muted);
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 700;
   font-size: 0.95rem;
   text-transform: uppercase;
@@ -1512,18 +1512,28 @@ p {
 .store-group summary::after {
   content: "+";
   margin-left: auto;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--line);
   border-radius: 50%;
-  color: var(--white);
-  background: var(--navy);
-  font-weight: 950;
+  color: var(--ink);
+  background: transparent;
+  font-weight: 500;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.store-group summary:hover::after {
+  border-color: var(--navy);
+  color: var(--navy);
 }
 
 .store-group[open] summary::after {
-  content: "-";
+  content: "−"; /* Unicode minus for better optical centering */
 }
 
 .group-dot {
