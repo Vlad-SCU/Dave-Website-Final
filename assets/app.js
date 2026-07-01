@@ -435,4 +435,12 @@ document.addEventListener("DOMContentLoaded", () => {
   setupProofSlider();
   setupReveal();
   setupServiceModal();
+
+  window.addEventListener("streamlineStoresUpdated", () => {
+    if (window.STREAMLINE_STORE_DATA) {
+      storeData.groups = window.STREAMLINE_STORE_DATA.groups;
+      storeData.allItems = storeData.groups.flatMap((g) => g.items);
+      renderStores();
+    }
+  });
 });

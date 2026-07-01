@@ -290,6 +290,8 @@
     isEditModeActive = enable;
     const bar = document.getElementById("admin-control-bar");
     if (bar) bar.style.display = enable ? "flex" : "none";
+    if (enable) document.body.classList.add("admin-mode");
+    else document.body.classList.remove("admin-mode");
 
     document.querySelectorAll("[data-admin-key]").forEach((el) => {
       if (enable) {
@@ -300,6 +302,146 @@
         el.removeEventListener("click", handleElementClick, { capture: true });
       }
     });
+
+    // Handle hide/unhide toggles on sections
+    document.querySelectorAll("section").forEach(sec => {
+      if (enable) {
+        let toggle = sec.querySelector(".admin-section-toggle");
+        if (!toggle) {
+          sec.style.position = sec.style.position || "relative";
+          toggle = document.createElement("button");
+          toggle.className = "admin-section-toggle button";
+          toggle.style.cssText = "position: absolute; top: 12px; right: 12px; z-index: 999; padding: 6px 12px; font-size: 0.8rem; background: rgba(0,0,0,0.8); color: white; border: none; cursor: pointer; border-radius: 8px;";
+          
+          const updateToggleText = () => {
+             toggle.textContent = sec.getAttribute("data-hidden") === "true" ? "👁️ Unhide Section" : "👻 Hide Section";
+          };
+          updateToggleText();
+          
+          toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (sec.getAttribute("data-hidden") === "true") {
+              sec.removeAttribute("data-hidden");
+            } else {
+              sec.setAttribute("data-hidden", "true");
+            }
+            updateToggleText();
+          });
+          sec.appendChild(toggle);
+        }
+      } else {
+        const toggle = sec.querySelector(".admin-section-toggle");
+        if (toggle) toggle.remove();
+      }
+    });
+
+    // Handle Add Store button
+    const storesWrapper = document.querySelector(".store-directory");
+    if (storesWrapper) {
+      if (enable) {
+        let addStoreBtn = document.querySelector(".admin-add-store-btn");
+        if (!addStoreBtn) {
+          addStoreBtn = document.createElement("button");
+          addStoreBtn.className = "admin-add-store-btn button primary";
+          addStoreBtn.textContent = "➕ Add New Store";
+          addStoreBtn.style.cssText = "display: block; margin: 0 auto 30px auto; width: fit-content; padding: 10px 20px; font-size: 1rem; border-radius: 999px;";
+          addStoreBtn.addEventListener("click", openAddStoreModal);
+          storesWrapper.parentNode.insertBefore(addStoreBtn, storesWrapper);
+        }
+      } else {
+        const addStoreBtn = document.querySelector(".admin-add-store-btn");
+        if (addStoreBtn) addStoreBtn.remove();
+      }
+    }
+  }
+
+  function openAddStoreModal() {
+    let backdrop = document.querySelector(".admin-edit-backdrop");
+    if (!backdrop) {
+      backdrop = document.createElement("div");
+      backdrop.className = "admin-edit-backdrop";
+      backdrop.style.cssText = "position: fixed; inset: 0; background: rgba(16, 41, 64, 0.65); backdrop-filter: blur(8px); z-index: 1000001; display: grid; place-items: center; padding: 20px;";
+      document.body.appendChild(backdrop);
+    }
+    backdrop.replaceChildren();
+
+    const card = document.createElement("div");
+    card.style.cssText = "background: var(--white); border-radius: 16px; padding: 32px; width: min(500px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 16px;";
+
+    const title = document.createElement("h3");
+    title.textContent = "Add New Store";
+    title.style.cssText = "margin: 0; font-size: 1.35rem; color: var(--navy);";
+    card.appendChild(title);
+
+    const mkInput = (lbl, placeholder) => {
+      const wrap = document.createElement("label");
+      wrap.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+      wrap.textContent = lbl;
+      const inp = document.createElement("input");
+      inp.type = "text";
+      inp.placeholder = placeholder;
+      inp.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+      wrap.appendChild(inp);
+      card.appendChild(wrap);
+      return inp;
+    };
+
+    const nameInp = mkInput("Store Name:", "e.g. Glacier Peak Wrestling");
+    const logoInp = mkInput("Logo URL:", "https://...");
+    const urlInp = mkInput("Store Link:", "https://streamline-llc.net/...");
+
+    const catLabel = document.createElement("label");
+    catLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+    catLabel.textContent = "Category:";
+    const catSelect = document.createElement("select");
+    catSelect.style.cssText = "padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; font-weight: normal; font-family: inherit;";
+    if (window.STREAMLINE_STORE_DATA && window.STREAMLINE_STORE_DATA.groups) {
+      window.STREAMLINE_STORE_DATA.groups.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g.group;
+        opt.textContent = g.group;
+        catSelect.appendChild(opt);
+      });
+    }
+    catLabel.appendChild(catSelect);
+    card.appendChild(catLabel);
+
+    const btnRow = document.createElement("div");
+    btnRow.style.cssText = "display: flex; gap: 12px; margin-top: 12px;";
+
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.className = "button quiet";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer;";
+    cancelBtn.addEventListener("click", () => backdrop.remove());
+
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "button primary";
+    saveBtn.textContent = "Add Store";
+    saveBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer;";
+    
+    saveBtn.addEventListener("click", () => {
+      const targetGroup = window.STREAMLINE_STORE_DATA.groups.find(g => g.group === catSelect.value);
+      if (targetGroup && nameInp.value) {
+        targetGroup.items.push({
+          name: nameInp.value,
+          logo: logoInp.value,
+          url: urlInp.value
+        });
+        window.STREAMLINE_STORE_DATA.storeCount++;
+        // Dispatch event to app.js so it can re-render
+        window.dispatchEvent(new Event("streamlineStoresUpdated"));
+        window.streamlineStoresModified = true;
+      }
+      backdrop.remove();
+    });
+
+    btnRow.appendChild(cancelBtn);
+    btnRow.appendChild(saveBtn);
+    card.appendChild(btnRow);
+    backdrop.appendChild(card);
   }
 
   function handleElementClick(e) {
@@ -434,6 +576,10 @@
     adminModals.forEach((m) => m.remove());
     const adminBtn = htmlClone.querySelector(".admin-toggle-btn");
     if (adminBtn) adminBtn.remove();
+    const sectionToggles = htmlClone.querySelectorAll(".admin-section-toggle");
+    sectionToggles.forEach(t => t.remove());
+    const addStoreBtns = htmlClone.querySelectorAll(".admin-add-store-btn");
+    addStoreBtns.forEach(b => b.remove());
 
     const htmlContent = "<!DOCTYPE html>\n" + htmlClone.outerHTML;
     
@@ -442,7 +588,10 @@
     fetch('/api/publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ html: htmlContent })
+      body: JSON.stringify({ 
+        html: htmlContent,
+        storesJSON: window.streamlineStoresModified ? window.STREAMLINE_STORE_DATA : null
+      })
     })
     .then(res => res.json())
     .then(data => {

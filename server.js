@@ -25,9 +25,14 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const payload = JSON.parse(body);
-        if (payload.html) {
-          // Write updated HTML to index.html
-          fs.writeFileSync(path.join(__dirname, 'index.html'), payload.html, 'utf8');
+        if (payload.html || payload.storesJSON) {
+          if (payload.html) {
+            fs.writeFileSync(path.join(__dirname, 'index.html'), payload.html, 'utf8');
+          }
+          if (payload.storesJSON) {
+            const content = `window.STREAMLINE_STORE_DATA = ${JSON.stringify(payload.storesJSON, null, 2)};`;
+            fs.writeFileSync(path.join(__dirname, 'assets', 'stores.js'), content, 'utf8');
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ success: true }));
         } else {
