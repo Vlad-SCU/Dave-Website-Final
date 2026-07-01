@@ -110,7 +110,7 @@ function renderStores() {
 
     const details = document.createElement("details");
     details.className = "store-group";
-    details.open = index < 5 || Boolean(state.query);
+    details.open = index === 0 || Boolean(state.query);
 
     const summary = document.createElement("summary");
     summary.innerHTML = `
