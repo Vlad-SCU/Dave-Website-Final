@@ -2048,17 +2048,6 @@ label + .submit-button {
   z-index: 1;
 }
 
-.contact::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(rgba(16, 41, 64, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(16, 41, 64, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  z-index: -1;
-}
-
 .contact-list {
   display: grid;
   gap: 10px;
@@ -2230,7 +2219,6 @@ label + .submit-button {
   color: rgba(255, 255, 255, 0.7);
   background: linear-gradient(180deg, #10151c, #0a0d14);
   padding: 80px 0 32px;
-  margin-top: 60px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
