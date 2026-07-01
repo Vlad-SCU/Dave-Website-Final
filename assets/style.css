@@ -1453,13 +1453,13 @@ p {
   min-height: 118px;
   border: none;
   border-radius: 12px;
-  background: var(--navy);
+  background: #f1f3f6;
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .featured-store:hover {
   transform: translateY(-2px);
-  background: var(--navy-2);
+  background: #e2e5ea;
 }
 
 .featured-store img {
@@ -1581,7 +1581,7 @@ p {
   width: 54px;
   height: 54px;
   border-radius: 8px;
-  background: var(--navy);
+  background: #f1f3f6;
   border: none;
   overflow: hidden;
 }
