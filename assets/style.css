@@ -1510,30 +1510,31 @@ p {
 }
 
 .store-group summary::after {
-  content: "+";
+  content: "";
   margin-left: auto;
   width: 32px;
   height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: 1.5px solid var(--line);
   border-radius: 50%;
-  color: var(--ink);
-  background: transparent;
-  font-weight: 500;
-  font-size: 1.25rem;
-  line-height: 1;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  background-color: transparent;
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="%23141820" stroke-width="1.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 6v12M6 12h12"/></svg>');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  transition: border-color 0.2s ease, background-image 0.2s ease;
 }
 
 .store-group summary:hover::after {
   border-color: var(--navy);
-  color: var(--navy);
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="%23102940" stroke-width="1.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M12 6v12M6 12h12"/></svg>');
 }
 
 .store-group[open] summary::after {
-  content: "−"; /* Unicode minus for better optical centering */
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="%23141820" stroke-width="1.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 12h12"/></svg>');
+}
+
+.store-group[open] summary:hover::after {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="none" stroke="%23102940" stroke-width="1.5" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><path d="M6 12h12"/></svg>');
 }
 
 .group-dot {
