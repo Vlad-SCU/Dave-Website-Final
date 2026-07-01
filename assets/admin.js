@@ -57,10 +57,10 @@
   // Tag all editable elements with a stable identifier
   function tagEditableElements() {
     const selectors = [
-      "h1", "h2", "h3", "h4",
-      ".hero-copy p", ".section-head p", ".about p", ".team-header p", ".contact p", ".service-card p", ".workflow-step p",
-      ".service-card h3", ".workflow-step h3", ".team-card strong", ".team-card span",
-      ".sticker-cta span", ".nav-action span", ".button span",
+      "h1", "h2", "h3", "h4", "h5", "h6",
+      "p", "li", "small", "figcaption", "label span",
+      ".team-card strong", ".team-card span", ".value-card strong", ".step-num",
+      ".button", ".sticker-cta", ".nav-action",
       "img"
     ];
 
@@ -68,7 +68,7 @@
     selectors.forEach((sel) => {
       document.querySelectorAll(sel).forEach((el) => {
         // Avoid tagging modals or admin UI elements
-        if (el.closest("#admin-control-bar") || el.closest(".admin-modal-backdrop") || el.closest(".service-modal-backdrop")) {
+        if (el.closest("#admin-control-bar") || el.closest(".admin-modal-backdrop") || el.closest(".service-modal-backdrop") || el.closest(".admin-edit-backdrop")) {
           return;
         }
         if (!el.getAttribute("data-admin-key")) {
@@ -81,15 +81,28 @@
 
   // Create UI Elements using safe DOM methods
   function createAdminButton() {
-    const navActions = document.querySelector(".nav-actions");
-    if (!navActions) return;
+    const footerBottom = document.querySelector(".footer-bottom");
+    if (!footerBottom) return;
 
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "button quiet admin-toggle-btn";
+    btn.className = "admin-toggle-btn";
     btn.setAttribute("aria-label", "Admin Mode Login");
-    btn.style.cssText = "padding: 8px 14px; font-size: 0.85rem; border-radius: 999px; border: 1px dashed var(--line); color: var(--muted); cursor: pointer; background: transparent; transition: all 0.2s ease;";
+    btn.style.cssText = "padding: 4px 10px; font-size: 0.75rem; border-radius: 6px; border: 1px solid transparent; color: rgba(255, 255, 255, 0.45); cursor: pointer; background: transparent; transition: all 0.2s ease; margin-left: auto;";
     btn.textContent = "⚙️ Admin";
+
+    btn.addEventListener("mouseover", () => {
+      if (!isAdminAuthenticated) {
+        btn.style.color = "rgba(255, 255, 255, 0.9)";
+        btn.style.borderColor = "rgba(255, 255, 255, 0.2)";
+      }
+    });
+    btn.addEventListener("mouseout", () => {
+      if (!isAdminAuthenticated) {
+        btn.style.color = "rgba(255, 255, 255, 0.45)";
+        btn.style.borderColor = "transparent";
+      }
+    });
 
     btn.addEventListener("click", () => {
       if (!isAdminAuthenticated) {
@@ -99,7 +112,7 @@
       }
     });
 
-    navActions.appendChild(btn);
+    footerBottom.appendChild(btn);
   }
 
   function showLoginModal() {
@@ -194,14 +207,16 @@
     const btn = document.querySelector(".admin-toggle-btn");
     if (!btn) return;
     if (isAdminAuthenticated) {
-      btn.style.background = "var(--navy)";
-      btn.style.color = "var(--white)";
-      btn.style.borderColor = "var(--navy)";
+      btn.style.background = "var(--yellow)";
+      btn.style.color = "var(--ink)";
+      btn.style.borderColor = "var(--yellow)";
+      btn.style.fontWeight = "900";
       btn.textContent = "⚙️ Admin Active";
     } else {
       btn.style.background = "transparent";
-      btn.style.color = "var(--muted)";
-      btn.style.borderColor = "var(--line)";
+      btn.style.color = "rgba(255, 255, 255, 0.45)";
+      btn.style.borderColor = "transparent";
+      btn.style.fontWeight = "normal";
       btn.textContent = "⚙️ Admin";
     }
   }
