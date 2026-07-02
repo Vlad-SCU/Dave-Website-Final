@@ -846,7 +846,6 @@
     });
   }
 
-  // Inject CSS rules for admin editable highlights
   function injectAdminStyles() {
     if (document.getElementById("admin-styles")) return;
     const style = document.createElement("style");
@@ -860,6 +859,17 @@
         outline-offset: 4px;
         cursor: pointer !important;
         background: rgba(231, 71, 47, 0.05) !important;
+      }
+      body.admin-mode .hero-shade, 
+      body.admin-mode .glow-orb,
+      body.admin-mode .hero-content {
+        pointer-events: none !important;
+      }
+      body.admin-mode .hero-content > * {
+        pointer-events: auto !important;
+      }
+      body.admin-mode video.admin-editable-hover {
+        pointer-events: auto !important;
       }
     `;
     document.head.appendChild(style);
