@@ -48,7 +48,11 @@
           el.setAttribute("src", override.src);
           if (typeof override.alt === "string") el.setAttribute("alt", override.alt);
         } else if (override.type === "video" && typeof override.src === "string") {
-          el.innerHTML = `<source src="${override.src}" type="video/mp4">`;
+          el.replaceChildren();
+          const source = document.createElement("source");
+          source.setAttribute("src", override.src);
+          source.setAttribute("type", "video/mp4");
+          el.appendChild(source);
           el.load();
         } else if (override.type === "avatar" && typeof override.src === "string") {
           el.style.backgroundImage = `url(${override.src})`;
@@ -723,7 +727,11 @@
         const newSrc = srcInput.value.trim();
         if (newSrc) {
           if (isVideo) {
-            el.innerHTML = `<source src="${newSrc}" type="video/mp4">`;
+            el.replaceChildren();
+            const source = document.createElement("source");
+            source.setAttribute("src", newSrc);
+            source.setAttribute("type", "video/mp4");
+            el.appendChild(source);
             el.load();
             editedOverrides[key] = { type: "video", src: newSrc };
           } else {

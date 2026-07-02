@@ -18,9 +18,20 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   // Simple router
   if (req.method === 'POST' && req.url === '/api/publish') {
+    // CSRF Protection: Only allow requests originating from the same local server
+    const origin = req.headers.origin || req.headers.referer;
+    if (origin && !origin.includes(`http://${HOST}:${PORT}`) && !origin.includes(`http://localhost:${PORT}`)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Forbidden: Invalid Origin' }));
+    }
+
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
+      // Prevent DoS: Limit payload to 10MB
+      if (body.length > 10 * 1024 * 1024) {
+        req.destroy();
+      }
     });
     req.on('end', () => {
       try {
@@ -53,10 +64,16 @@ const server = http.createServer((req, res) => {
     // Remove query strings like ?v=2
     filePath = filePath.split('?')[0];
     
-    const ext = path.extname(filePath);
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    // Path Traversal Prevention
+    const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+    const fullPath = path.join(__dirname, safePath);
+    if (!fullPath.startsWith(__dirname)) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
 
-    const fullPath = path.join(__dirname, filePath);
+    const ext = path.extname(fullPath);
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
     fs.readFile(fullPath, (err, data) => {
       if (err) {
