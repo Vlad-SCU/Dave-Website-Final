@@ -14,10 +14,8 @@
   let isEditModeActive = false;
   let editedOverrides = {};
 
-  // Default admin password is "streamline-2026"
-  // Salt: "streamline-salt-98290"
-  // SHA-256 Hex of "streamline-salt-98290:streamline-2026"
-  const EXPECTED_HASH = "a051a7016c051505ac2c21b769d1121e1e3f826dbb54a2de14045685937775cf";
+  // Admin password hash
+  const EXPECTED_HASH = "a337b24905032356c8ae22f78e954c52e68dde22a9efc243fc65705a975176b2";
   const SALT = "streamline-salt-98290";
 
   async function hashPassword(password) {
@@ -164,7 +162,7 @@
 
       const input = document.createElement("input");
       input.type = "password";
-      input.placeholder = "Password (default: streamline-2026)";
+      input.placeholder = "Password";
       input.style.cssText = "padding: 12px 16px; border: 1px solid var(--line); border-radius: 8px; font-size: 1rem; width: 100%; box-sizing: border-box;";
 
       const errorMsg = document.createElement("span");
