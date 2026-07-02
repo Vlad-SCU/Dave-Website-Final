@@ -860,10 +860,15 @@
         cursor: pointer !important;
         background: rgba(231, 71, 47, 0.05) !important;
       }
-      body.admin-mode img.admin-editable-hover:hover,
-      body.admin-mode video.admin-editable-hover:hover {
+      body.admin-mode img.admin-editable-hover:hover {
         outline-offset: -6px !important;
         transform: scale(1) !important;
+      }
+      body.admin-mode video.admin-editable-hover:hover {
+        outline: 4px dashed var(--yellow) !important;
+        outline-offset: -8px !important;
+        transform: scale(1) !important;
+        box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1) !important;
       }
       body.admin-mode .hero-shade, 
       body.admin-mode .glow-orb,
