@@ -1169,6 +1169,7 @@ p {
   backdrop-filter: blur(10px);
   font-weight: 900;
   font-size: 1.15rem;
+  text-align: center;
 }
 
 @keyframes workSlide {
