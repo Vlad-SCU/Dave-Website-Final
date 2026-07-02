@@ -47,6 +47,14 @@
         } else if (override.type === "image" && typeof override.src === "string") {
           el.setAttribute("src", override.src);
           if (typeof override.alt === "string") el.setAttribute("alt", override.alt);
+        } else if (override.type === "video" && typeof override.src === "string") {
+          el.innerHTML = `<source src="${override.src}" type="video/mp4">`;
+          el.load();
+        } else if (override.type === "avatar" && typeof override.src === "string") {
+          el.style.backgroundImage = `url(${override.src})`;
+          el.style.backgroundSize = "cover";
+          el.style.backgroundPosition = "center";
+          el.style.color = "transparent";
         }
       });
       
@@ -77,7 +85,7 @@
       "p", "li", "small", "figcaption", "label span",
       ".team-card strong", ".team-card span", ".value-card strong", ".step-num",
       ".button", ".sticker-cta", ".nav-action",
-      "img"
+      "img", "video"
     ];
 
     let counter = 0;
@@ -556,7 +564,11 @@
     card.style.cssText = "background: var(--white); border-radius: 16px; padding: 32px; width: min(500px, 100%); box-shadow: 0 20px 50px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 16px;";
 
     const title = document.createElement("h3");
-    title.textContent = el.tagName.toLowerCase() === "img" ? "Edit Image Element" : "Edit Text Content";
+    if (el.tagName.toLowerCase() === "img") title.textContent = "Edit Image Element";
+    else if (el.tagName.toLowerCase() === "video") title.textContent = "Edit Background Video";
+    else if (el.classList.contains("team-avatar")) title.textContent = "Edit Team Avatar";
+    else title.textContent = "Edit Text Content";
+    
     title.style.cssText = "margin: 0; font-size: 1.35rem; color: var(--navy);";
 
     card.appendChild(title);
@@ -636,6 +648,91 @@
           el.setAttribute("src", newSrc);
           el.setAttribute("alt", newAlt);
           editedOverrides[key] = { type: "image", src: newSrc, alt: newAlt };
+        }
+        backdrop.style.display = "none";
+      });
+
+      btnRow.appendChild(cancelBtn);
+      btnRow.appendChild(applyBtn);
+      card.appendChild(btnRow);
+    } else if (el.tagName.toLowerCase() === "video" || el.classList.contains("team-avatar")) {
+      const isVideo = el.tagName.toLowerCase() === "video";
+      const srcLabel = document.createElement("label");
+      srcLabel.style.cssText = "display: flex; flex-direction: column; gap: 6px; font-size: 0.9rem; font-weight: 700; color: var(--ink);";
+      srcLabel.textContent = isVideo ? "Video URL or Upload File (MP4):" : "Avatar Image URL or Upload File:";
+      
+      const mediaWrapper = document.createElement("div");
+      mediaWrapper.style.cssText = "display: flex; gap: 8px;";
+      
+      const srcInput = document.createElement("input");
+      srcInput.type = "text";
+      if (isVideo) {
+        const source = el.querySelector("source");
+        srcInput.value = source ? source.getAttribute("src") : "";
+      } else {
+        const bgImg = el.style.backgroundImage;
+        srcInput.value = bgImg ? bgImg.replace(/^url\(['"]?([^'"]+)['"]?\)/, '$1') : "";
+      }
+      srcInput.style.cssText = "flex: 1; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 0.95rem;";
+      
+      const fileInp = document.createElement("input");
+      fileInp.type = "file";
+      fileInp.accept = isVideo ? "video/mp4" : "image/*";
+      fileInp.style.display = "none";
+      
+      const fileBtn = document.createElement("button");
+      fileBtn.type = "button";
+      fileBtn.className = "button quiet";
+      fileBtn.textContent = "📁 Upload";
+      fileBtn.style.cssText = "padding: 10px; border-radius: 8px; cursor: pointer; white-space: nowrap;";
+      fileBtn.addEventListener("click", () => fileInp.click());
+      
+      fileInp.addEventListener("change", () => {
+        const file = fileInp.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            srcInput.value = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      
+      mediaWrapper.appendChild(srcInput);
+      mediaWrapper.appendChild(fileBtn);
+      mediaWrapper.appendChild(fileInp);
+      srcLabel.appendChild(mediaWrapper);
+      card.appendChild(srcLabel);
+
+      const btnRow = document.createElement("div");
+      btnRow.style.cssText = "display: flex; gap: 12px; margin-top: 10px;";
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "button quiet";
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer;";
+      cancelBtn.addEventListener("click", () => { backdrop.style.display = "none"; });
+
+      const applyBtn = document.createElement("button");
+      applyBtn.type = "button";
+      applyBtn.className = "button primary";
+      applyBtn.textContent = isVideo ? "Apply Video Change" : "Apply Avatar Change";
+      applyBtn.style.cssText = "flex: 1; padding: 12px; border-radius: 999px; cursor: pointer;";
+      applyBtn.addEventListener("click", () => {
+        const newSrc = srcInput.value.trim();
+        if (newSrc) {
+          if (isVideo) {
+            el.innerHTML = `<source src="${newSrc}" type="video/mp4">`;
+            el.load();
+            editedOverrides[key] = { type: "video", src: newSrc };
+          } else {
+            el.style.backgroundImage = `url(${newSrc})`;
+            el.style.backgroundSize = "cover";
+            el.style.backgroundPosition = "center";
+            el.style.color = "transparent";
+            editedOverrides[key] = { type: "avatar", src: newSrc };
+          }
         }
         backdrop.style.display = "none";
       });
