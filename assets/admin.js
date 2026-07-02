@@ -869,11 +869,15 @@
         outline-offset: -8px !important;
         transform: scale(1) !important;
         box-shadow: inset 0 0 0 1000px rgba(255, 255, 255, 0.1) !important;
+        z-index: 2 !important;
       }
       body.admin-mode .hero-shade, 
       body.admin-mode .glow-orb,
       body.admin-mode .hero-content {
         pointer-events: none !important;
+      }
+      body.admin-mode .hero-content {
+        z-index: 3 !important;
       }
       body.admin-mode .hero-content > * {
         pointer-events: auto !important;
