@@ -860,6 +860,11 @@
         cursor: pointer !important;
         background: rgba(231, 71, 47, 0.05) !important;
       }
+      body.admin-mode img.admin-editable-hover:hover,
+      body.admin-mode video.admin-editable-hover:hover {
+        outline-offset: -6px !important;
+        transform: scale(1) !important;
+      }
       body.admin-mode .hero-shade, 
       body.admin-mode .glow-orb,
       body.admin-mode .hero-content {
