@@ -17,9 +17,8 @@
   // Default admin password is "streamline-2026"
   // Salt: "streamline-salt-98290"
   // SHA-256 Hex of "streamline-salt-98290:streamline-2026"
-  const EXPECTED_HASH = "80f4f9f7a5b3a4a5b6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9"; // We will compute dynamically below for robustness
+  const EXPECTED_HASH = "a051a7016c051505ac2c21b769d1121e1e3f826dbb54a2de14045685937775cf";
   const SALT = "streamline-salt-98290";
-  const DEFAULT_PASS = "streamline-2026";
 
   async function hashPassword(password) {
     const encoder = new TextEncoder();
@@ -196,7 +195,7 @@
       const handleLogin = async () => {
         const pass = input.value.trim();
         const hashed = await hashPassword(pass);
-        const expected = await hashPassword(DEFAULT_PASS);
+        const expected = EXPECTED_HASH;
 
         if (hashed === expected) {
           isAdminAuthenticated = true;
